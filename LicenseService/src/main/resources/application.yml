@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: licensing-service
+  profiles:
+    active: dev
+  config:
+    import: configserver:http://configserver:8071
+    #    Включить, если нужно запустить на локальном хосте
+#    import: configserver:http://localhost:8071
+
+
+
+
+
+

@@ -1,0 +1,148 @@
+version: '2.1'
+services:
+  database:
+    image: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/1-init.sql
+      - ./data.sql:/docker-entrypoint-initdb.d/2-data.sql
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: "postgres"
+    networks:
+      backend:
+        aliases:
+          - "database"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  configserver:
+    image: ostock/configserver
+    ports:
+      - "8071:8071"
+    environment:
+      ENCRYPT_KEY: "fje83Ki8403Iod87dne7Yjsl3THueh48jfuO9j4U2hf64Lo"
+    networks:
+      backend:
+        aliases:
+          - "configserver"
+  eurekaserver:
+    image: ostock/eurekaserver
+    ports:
+      - "8070:8070"
+    environment:
+      SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071"
+    depends_on:
+      database:
+        condition: service_healthy
+      configserver:
+        condition: service_started
+    networks:
+      backend:
+        aliases:
+          - "eurekaserver"
+  gatewayserver:
+    image: ostock/gateway
+    ports:
+      - "8072:8072"
+    environment:
+      SERVER_PORT: "8072"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eurekaserver:8070/eureka/"
+      EUREKASERVER_PORT: "8070"
+    depends_on:
+      database:
+        condition: service_healthy
+      configserver:
+        condition: service_started
+      eurekaserver:
+        condition: service_started
+    networks:
+      - backend
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    ports:
+      - "2181:2181"
+    environment:
+      - ZOOKEEPER_CLIENT_PORT=2181
+    networks:
+      backend:
+        aliases:
+          - "zookeeper"
+  kafkaserver:
+      image: confluentinc/cp-kafka:latest
+      ports:
+        - "9092:9092"
+      environment:
+        - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+        - KAFKA_ADVERTISED_HOST_NAME=kafka
+        - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+        - KAFKA_CREATE_TOPICS=dresses:1:1,ratings:1:1
+      volumes:
+        - "/var/run/docker.sock:/var/run/docker.sock"
+      depends_on:
+        - zookeeper
+      networks:
+        backend:
+          aliases:
+            - "kafka"
+  redisserver:
+      image: redis:alpine
+      ports:
+        - "6379:6379"
+      networks:
+        backend:
+          aliases:
+            - "redis"
+  licensingservice:
+    image: ostock/licensing-service
+    environment:
+      PROFILE: "dev"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eurekaserver:8070/eureka/"
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://database:5432/postgres"
+      DATABASESERVER_PORT: "5432"
+      ENCRYPT_KEY: "IMSYMMETRIC"
+    depends_on:
+      database:
+        condition: service_healthy
+      configserver:
+        condition: service_started
+    ports:
+      - "8180:8080"
+    networks:
+      - backend
+  organizationservice:
+    image: ostock/organization-service
+    environment:
+      PROFILE: "dev"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eurekaserver:8070/eureka/"
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://database:5432/postgres"
+      DATABASESERVER_PORT: "5432"
+      ENCRYPT_KEY: "IMSYMMETRIC"
+    depends_on:
+      database:
+        condition: service_healthy
+      configserver:
+        condition: service_started
+    ports:
+      - "8081:8081"
+    networks:
+      - backend
+#  keycloak:
+#    image: sleighzy/keycloak
+#    restart: always
+#    environment:
+#      KEYCLOAK_USER: admin
+#      KEYCLOAK_PASSWORD: admin
+#    ports:
+#      - "8080:8080"
+#    networks:
+#      backend:
+#        aliases:
+#          - "keycloak"
+networks:
+  backend:
+    driver: bridge
