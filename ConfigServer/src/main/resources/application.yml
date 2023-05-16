@@ -8,7 +8,7 @@ spring:
       label: main
       server:
         git:
-          uri: https://github.com/Kamperk/Microservices/configs.git
+          uri: https://github.com/Kamperk/Microservices.git
           search-paths: /
 
 server:
