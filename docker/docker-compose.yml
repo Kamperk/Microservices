@@ -104,6 +104,8 @@ services:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eurekaserver:8070/eureka/"
       SPRING_DATASOURCE_URL: "jdbc:postgresql://database:5432/postgres"
       DATABASESERVER_PORT: "5432"
+      spring_datasource_username: "postgres"
+      spring_datasource_password: "postgres"
       ENCRYPT_KEY: "IMSYMMETRIC"
     depends_on:
       database:
@@ -121,6 +123,8 @@ services:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eurekaserver:8070/eureka/"
       SPRING_DATASOURCE_URL: "jdbc:postgresql://database:5432/postgres"
       DATABASESERVER_PORT: "5432"
+      spring_datasource_username: "postgres"
+      spring_datasource_password: "postgres"
       ENCRYPT_KEY: "IMSYMMETRIC"
     depends_on:
       database:
