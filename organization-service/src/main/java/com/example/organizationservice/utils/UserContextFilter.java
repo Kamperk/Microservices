@@ -13,8 +13,8 @@ public class UserContextFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
 
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
-        UserContextHolder.getUserContext().setUserId(httpServletRequest.getHeader(UserContext.USER_ID));
-        UserContextHolder.getUserContext().setAuthToken(httpServletRequest.getHeader(UserContext.AUTH_TOKEN));
+//        UserContextHolder.getUserContext().setUserId(httpServletRequest.getHeader(UserContext.USER_ID));
+//        UserContextHolder.getUserContext().setAuthToken(httpServletRequest.getHeader(UserContext.AUTH_TOKEN));
         UserContextHolder.getUserContext().setCorrelationId(httpServletRequest.getHeader(UserContext.CORRELATION_ID));
         UserContextHolder.getUserContext().setOrganizationId(httpServletRequest.getHeader(UserContext.ORGANIZATION_ID));
 
