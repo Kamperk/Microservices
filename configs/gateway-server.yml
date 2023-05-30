@@ -17,6 +17,8 @@ spring:
       discovery.locator:
         enabled: true
         lowerCaseServiceId: true
+  autoconfigure:
+    exclude: org.springframework.cloud.netflix.eureka.EurekaDiscoveryClientConfiguration
 
 management:
   endpoints:
