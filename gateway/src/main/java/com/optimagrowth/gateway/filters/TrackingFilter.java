@@ -20,7 +20,7 @@ import reactor.core.publisher.Mono;
 @AllArgsConstructor
 public class TrackingFilter implements GlobalFilter {
 
-    FilterUtils filterUtils;
+    private FilterUtils filterUtils;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -39,11 +39,7 @@ public class TrackingFilter implements GlobalFilter {
 
 
     private boolean isCorrelationIdPresent(HttpHeaders requestHeaders) {
-        if (filterUtils.getCorrelationId(requestHeaders) != null) {
-            return true;
-        } else {
-            return false;
-        }
+        return filterUtils.getCorrelationId(requestHeaders) != null;
     }
 
     private String generateCorrelationId() {
